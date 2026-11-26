@@ -1,0 +1,25 @@
+@startuml
+interface ICache {
+  +get(key)
+  +set(key, value)
+  +remove(key)
+}
+
+class CacheManager {
+  -caches: list[ICache]
+  +get(key)
+  +set(key, value)
+  +remove(key)
+}
+
+class MemoryCache
+class DiskCache
+class RedisCache
+class DistributedCache
+
+CacheManager o--> ICache
+ICache <|.. MemoryCache
+ICache <|.. DiskCache
+ICache <|.. RedisCache
+ICache <|.. DistributedCache
+@enduml
