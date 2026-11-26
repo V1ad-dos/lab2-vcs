@@ -3,13 +3,14 @@ from app.caches.disk_cache import DiskCache
 from app.caches.distributed_cache import DistributedCache
 from app.caches.memory_cache import MemoryCache
 from app.caches.redis_cache import RedisCache
+from app.logger import LoggingCache
 
 
 def main():
-    # Сборка сети зависимостей
-    memory_cache = MemoryCache()
-    disk_cache = DiskCache("data/cache.json")
-    redis_cache = RedisCache("localhost:6379")
+    # Сборка сети зависимостей; LoggingCache — обёртка, CacheManager не меняется
+    memory_cache = LoggingCache(MemoryCache(), "MemoryCache")
+    disk_cache = LoggingCache(DiskCache("data/cache.json"), "DiskCache")
+    redis_cache = LoggingCache(RedisCache("localhost:6379"), "RedisCache")
 
     manager = CacheManager([memory_cache, disk_cache, redis_cache])
 
@@ -25,7 +26,7 @@ def main():
     print("После удаления:", manager.get("user:1"))
 
     print("\n--- Добавляем DistributedCache (CacheManager не меняется) ---")
-    distributed_cache = DistributedCache(node_count=3)
+    distributed_cache = LoggingCache(DistributedCache(node_count=3), "DistributedCache")
     extended_manager = CacheManager([memory_cache, disk_cache, redis_cache, distributed_cache])
 
     distributed_cache.set("order:101", "1500.50")
